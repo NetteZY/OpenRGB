@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <hidapi.h>
-#include "RGBColor.h"
+#include "RGBControllerInterface.h"
 
 class RakkLamAngV1Controller
 {
