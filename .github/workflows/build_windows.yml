@@ -1,0 +1,40 @@
+name: Build OpenRGB Windows
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2019
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '5.15.2'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+
+    - name: Set up MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Configure with QMake
+      run: |
+        qmake -r OpenRGB.pro
+
+    - name: Build
+      run: |
+        nmake
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: OpenRGB-Windows
+        path: release/OpenRGB.exe
