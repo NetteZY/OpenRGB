@@ -21,61 +21,32 @@ RGBController_RakkLamAngV1::~RGBController_RakkLamAngV1()
 
 void RGBController_RakkLamAngV1::SetupZones()
 {
+    // Define 5 rows and 17 columns matrix map
+    // 0xFFFFFFFF = unused position
+    static unsigned int matrix_map_data[5][17] =
+    {
+        // Row 0 (F-row): 16 keys
+        {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 0xFFFFFFFF },
+        // Row 1 (Num-row): 17 keys
+        { 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 },
+        // Row 2 (Q-row): 17 keys
+        { 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49 },
+        // Row 3 (A-row): 14 keys
+        { 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF },
+        // Row 4 (Z-row): 4 keys
+        { 63, 64, 65, 66, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF }
+    };
+
     zone new_zone;
     new_zone.name       = "Keyboard Matrix";
     new_zone.type       = ZONE_TYPE_MATRIX;
     new_zone.leds_min   = 68;
     new_zone.leds_max   = 68;
     new_zone.leds_count = 68;
-    new_zone.matrix_map = new matrix_map_type;
-
-    // Define 5 rows and 17 columns matrix
-    new_zone.matrix_map->height = 5;
-    new_zone.matrix_map->width  = 17;
-    new_zone.matrix_map->map    = new unsigned int[5 * 17];
-
-    // Initialize map with 0xFFFFFFFF (unused)
-    for (int i = 0; i < 5 * 17; ++i)
-    {
-        new_zone.matrix_map->map[i] = 0xFFFFFFFF;
-    }
-
-    // Row 0 (F-row): 16 keys. (Col 0 to 15)
-    // Esc (0), F1-F4 (1-4), F5-F8 (5-8), F9-F12 (9-12), Print (13), Scroll (14), Pause (15)
-    for (unsigned int col = 0; col < 16; ++col)
-    {
-        new_zone.matrix_map->map[0 * 17 + col] = col;
-    }
-
-    // Row 1 (Num-row): 17 keys. (Col 0 to 16)
-    // ~ to Backspace (16 to 29 -> indices 16 to 29), Insert (30), Home (31), PgUp (32)
-    for (unsigned int col = 0; col < 17; ++col)
-    {
-        new_zone.matrix_map->map[1 * 17 + col] = 16 + col;
-    }
-
-    // Row 2 (Q-row): 17 keys. (Col 0 to 16)
-    // Tab to | (33 to 46 -> indices 33 to 46), Del (47), End (48), PgDn (49)
-    for (unsigned int col = 0; col < 17; ++col)
-    {
-        new_zone.matrix_map->map[2 * 17 + col] = 33 + col;
-    }
-
-    // Row 3 (A-row): 14 keys. (Col 0 to 13)
-    // Caps Lock to Enter (50 to 63 -> indices 50 to 63)
-    for (unsigned int col = 0; col < 14; ++col)
-    {
-        new_zone.matrix_map->map[3 * 17 + col] = 50 + col;
-    }
-
-    // Row 4 (Z-row): 4 keys. (Col 0 to 3)
-    // Left Shift, Z, X, C (64 to 67 -> indices 64 to 67)
-    for (unsigned int col = 0; col < 4; ++col)
-    {
-        new_zone.matrix_map->map[4 * 17 + col] = 64 + col;
-    }
+    new_zone.matrix_map.Set(5, 17, (unsigned int *)&matrix_map_data);
 
     zones.push_back(new_zone);
+
 
     // List of key names matching the XML
     const char* led_names[68] = {
