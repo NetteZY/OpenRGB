@@ -6,6 +6,14 @@
 DetectedControllers DetectRakkLamAngV1Keyboards(hid_device_info* info, const std::string& /*name*/)
 {
     DetectedControllers detected_controllers;
+
+    // On Windows, the interface number is reported as -1, so we filter by usage page instead.
+    // The vendor-defined control interface has usage page >= 0xFF00.
+    if (info->usage_page < 0xFF00)
+    {
+        return detected_controllers;
+    }
+
     hid_device* dev = hid_open_path(info->path);
 
     if (dev)
@@ -18,4 +26,5 @@ DetectedControllers DetectRakkLamAngV1Keyboards(hid_device_info* info, const std
     return(detected_controllers);
 }
 
-REGISTER_HID_DETECTOR_I("RAKK Lam-Ang Lite V1", DetectRakkLamAngV1Keyboards, 0x0C45, 0x8006, 0);
+REGISTER_HID_DETECTOR("RAKK Lam-Ang Lite V1", DetectRakkLamAngV1Keyboards, 0x0C45, 0x8006);
+
