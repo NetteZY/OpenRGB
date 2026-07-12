@@ -1,5 +1,5 @@
-#include "RGBController.h"
 #include "RakkLamAngV1Controller.h"
+#include "LogManager.h"
 #include <cstring>
 #include <chrono>
 #include <thread>
@@ -8,8 +8,10 @@
 
 RakkLamAngV1Controller::RakkLamAngV1Controller(hid_device* dev_handle, const char* path)
 {
+    LOG_INFO("[RAKK Controller] Constructor called");
     dev = dev_handle;
     location = path;
+    LOG_INFO("[RAKK Controller] Path: %s, dev: %p", location.c_str(), dev);
 }
 
 RakkLamAngV1Controller::~RakkLamAngV1Controller()
@@ -38,25 +40,25 @@ std::string RakkLamAngV1Controller::GetLocation()
 
 void RakkLamAngV1Controller::SendCmd(const unsigned char* cmd_bytes, size_t len)
 {
+    LOG_INFO("[RAKK Controller] SendCmd len=%zu, cmd[0]=0x%02X", len, cmd_bytes[0]);
     unsigned char buf[65];
     memset(buf, 0, sizeof(buf));
     buf[0] = 0x00; // Report ID
     memcpy(&buf[1], cmd_bytes, len);
 
-    hid_send_feature_report(dev, buf, 65);
+    LOG_INFO("[RAKK Controller] Calling hid_send_feature_report...");
+    int ret = hid_send_feature_report(dev, buf, 65);
+    LOG_INFO("[RAKK Controller] hid_send_feature_report returned: %d", ret);
+    
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     unsigned char resp[65];
     memset(resp, 0, sizeof(resp));
     resp[0] = 0x00;
-    try
-    {
-        hid_get_feature_report(dev, resp, 65);
-    }
-    catch (...)
-    {
-        // Ignore read failures
-    }
+    
+    LOG_INFO("[RAKK Controller] Calling hid_get_feature_report...");
+    int ret_get = hid_get_feature_report(dev, resp, 65);
+    LOG_INFO("[RAKK Controller] hid_get_feature_report returned: %d", ret_get);
 }
 
 void RakkLamAngV1Controller::GetKeyBlock(unsigned char key_id, unsigned char r, unsigned char g, unsigned char b, unsigned char* block)
@@ -100,6 +102,7 @@ void RakkLamAngV1Controller::GetKeyBlock(unsigned char key_id, unsigned char r, 
 
 void RakkLamAngV1Controller::SetColors(const std::vector<RGBColor>& colors)
 {
+    LOG_INFO("[RAKK Controller] SetColors called with %zu colors", colors.size());
     // Ensure we have at least 68 colors
     std::vector<RGBColor> padded_colors = colors;
     if (padded_colors.size() < 68)
@@ -107,14 +110,17 @@ void RakkLamAngV1Controller::SetColors(const std::vector<RGBColor>& colors)
         padded_colors.resize(68, 0);
     }
 
+    LOG_INFO("[RAKK Controller] Sending Start Command...");
     // Step 1: Start Command
     const unsigned char start_cmd[] = { 0x04, 0x18, 0x00, 0x00 };
     SendCmd(start_cmd, sizeof(start_cmd));
 
+    LOG_INFO("[RAKK Controller] Sending Set Mode Command...");
     // Step 2: Set Mode Command
     const unsigned char mode_cmd[] = { 0x04, 0x13, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12 };
     SendCmd(mode_cmd, sizeof(mode_cmd));
 
+    LOG_INFO("[RAKK Controller] Sending 17 color packets...");
     // Step 3: Send 17 packets of 4 key blocks (68 slots total)
     for (unsigned char p_idx = 0; p_idx < 17; ++p_idx)
     {
@@ -133,10 +139,15 @@ void RakkLamAngV1Controller::SetColors(const std::vector<RGBColor>& colors)
             GetKeyBlock(key_id, r, g, b, &packet_data[1 + k * 16]);
         }
 
-        hid_send_feature_report(dev, packet_data, 65);
+        int ret = hid_send_feature_report(dev, packet_data, 65);
+        if (ret < 0)
+        {
+            LOG_INFO("[RAKK Controller] Packet %d send failed: %d", p_idx, ret);
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
 
+    LOG_INFO("[RAKK Controller] Sending Caps Lock packet...");
     // Step 4: Send 18th packet (Caps Lock key - Key 3)
     unsigned char packet18[65];
     memset(packet18, 0, sizeof(packet18));
@@ -148,14 +159,19 @@ void RakkLamAngV1Controller::SetColors(const std::vector<RGBColor>& colors)
     unsigned char b_cap = RGBGetBValue(cap_color);
 
     GetKeyBlock(3, r_cap, g_cap, b_cap, &packet18[1]);
-    // The rest of packet 18 is padded with zeros (already done by memset)
 
-    hid_send_feature_report(dev, packet18, 65);
+    int ret18 = hid_send_feature_report(dev, packet18, 65);
+    if (ret18 < 0)
+    {
+        LOG_INFO("[RAKK Controller] Packet 18 send failed: %d", ret18);
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
+    LOG_INFO("[RAKK Controller] Sending Apply Command...");
     // Step 5: Apply Command
     const unsigned char apply_cmd[] = { 0x04, 0x02, 0x00, 0x00 };
     SendCmd(apply_cmd, sizeof(apply_cmd));
+    LOG_INFO("[RAKK Controller] Apply Command sent.");
 }
 
 void RakkLamAngV1Controller::SaveToFlash()
