@@ -1,3 +1,4 @@
+#include "RGBController.h"
 #include "RakkLamAngV1Controller.h"
 #include <cstring>
 #include <chrono>
