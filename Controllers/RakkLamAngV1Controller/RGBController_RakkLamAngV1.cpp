@@ -1,7 +1,9 @@
 #include "RGBController_RakkLamAngV1.h"
+#include "LogManager.h"
 
 RGBController_RakkLamAngV1::RGBController_RakkLamAngV1(RakkLamAngV1Controller* controller_ptr)
 {
+    LOG_INFO("[RAKK RGBController] Constructor called");
     controller = controller_ptr;
 
     name        = controller->GetDeviceName();
@@ -11,7 +13,9 @@ RGBController_RakkLamAngV1::RGBController_RakkLamAngV1(RakkLamAngV1Controller* c
     location    = controller->GetLocation();
     serial      = controller->GetSerial();
 
+    LOG_INFO("[RAKK RGBController] Calling SetupZones...");
     SetupZones();
+    LOG_INFO("[RAKK RGBController] SetupZones completed.");
 }
 
 RGBController_RakkLamAngV1::~RGBController_RakkLamAngV1()
@@ -84,7 +88,9 @@ void RGBController_RakkLamAngV1::ResizeZone(int /*zone*/, int /*new_size*/)
 
 void RGBController_RakkLamAngV1::DeviceUpdateLEDs()
 {
+    LOG_INFO("[RAKK RGBController] DeviceUpdateLEDs called");
     controller->SetColors(colors);
+    LOG_INFO("[RAKK RGBController] DeviceUpdateLEDs completed");
 }
 
 void RGBController_RakkLamAngV1::UpdateZoneLEDs(int /*zone*/)
