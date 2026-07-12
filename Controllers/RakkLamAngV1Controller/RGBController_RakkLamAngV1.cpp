@@ -73,6 +73,8 @@ void RGBController_RakkLamAngV1::SetupZones()
     modes.push_back(custom_mode);
 
     active_mode = 0;
+
+    SetupColors();
 }
 
 void RGBController_RakkLamAngV1::ResizeZone(int /*zone*/, int /*new_size*/)
