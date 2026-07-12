@@ -58,7 +58,7 @@ void RGBController_RakkLamAngV1::SetupZones()
         "Key: Grave Accent", "Key: 1", "Key: 2", "Key: 3", "Key: 4", "Key: 5", "Key: 6", "Key: 7", "Key: 8", "Key: 9", "Key: 0", "Key: Minus", "Key: Equals", "Key: Backspace", "Key: Insert", "Key: Home", "Key: Page Up",
         "Key: Tab", "Key: Q", "Key: W", "Key: E", "Key: R", "Key: T", "Key: Y", "Key: U", "Key: I", "Key: O", "Key: P", "Key: Left Bracket", "Key: Right Bracket", "Key: Backslash", "Key: Delete", "Key: End", "Key: Page Down",
         "Key: Caps Lock", "Key: A", "Key: S", "Key: D", "Key: F", "Key: G", "Key: H", "Key: J", "Key: K", "Key: L", "Key: Semicolon", "Key: Apostrophe", "Key: Enter",
-        "Key: Left Shift", "Key: Z", "Key: X", "Key: C"
+        "Key: Left Shift", "Key: Z", "Key: X", "Key: C", "Key: Unused"
     };
 
     for (int i = 0; i < 68; ++i)
